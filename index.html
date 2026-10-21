@@ -4,284 +4,505 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BEE · Robot Simulator</title>
-<meta name="description" content="BEE: a free 3D robot simulator for the FIRST Tech Challenge 2026–27 season. Drive matches, build your robot and run your real Java OpModes. Windows, macOS and Linux.">
+<meta name="description" content="BEE is a free 3D robot simulator for the 2026–27 season. Import your robot, run your real Java OpModes and play full matches on Windows, macOS and Linux.">
+<meta name="theme-color" content="#07090d">
+<meta property="og:type" content="website">
 <meta property="og:title" content="BEE · Robot Simulator">
-<meta property="og:description" content="Free 3D robot simulator for the FIRST Tech Challenge 2026–27 season. Run your real Java OpModes.">
-<meta property="og:image" content="assets/test_in_sim.jpg">
+<meta property="og:description" content="Your robot. Your code. On the field. A free 3D robot simulator that runs your real Java.">
+<meta property="og:image" content="https://mariusandrei123.github.io/bee-simulator/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon-64.png">
 <link rel="apple-touch-icon" href="assets/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0e14;
-    --bg2: #121826;
-    --card: #161d2c;
-    --line: #242e44;
-    --text: #e9edf5;
-    --muted: #98a2b8;
+    --bg: #07090d;
+    --bg2: #0c1018;
+    --surface: #111722;
+    --surface2: #161e2c;
+    --line: rgba(255, 255, 255, .08);
+    --line2: rgba(255, 255, 255, .14);
+    --text: #eef2f8;
+    --muted: #9aa4b5;
+    --dim: #6b7486;
     --honey: #ffd43b;
-    --honey2: #f59f00;
-    --green: #2fb35f;
-    --red: #e03131;
-    --blue: #1c7ed6;
+    --amber: #f59f00;
+    --glow: rgba(255, 196, 0, .35);
+    --blue: #4dabf7;
+    --green: #51cf66;
+    --radius: 20px;
+    --display: "Archivo", "Arial Black", system-ui, sans-serif;
+    --body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  }
-  a { color: var(--honey); }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   img { max-width: 100%; height: auto; display: block; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
-  /* the game's display style: heavy, italic, uppercase */
-  .display { font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: .02em; }
+  a { color: inherit; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .display { font-family: var(--display); font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: -.01em; line-height: .95; }
+  .honey { color: var(--honey); }
+  .grad { background: linear-gradient(100deg, var(--honey), var(--amber) 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 700 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--honey); }
+  .eyebrow::before { content: ""; width: 18px; height: 3px; background: var(--honey); transform: skewX(-20deg); border-radius: 2px; }
 
-  nav { position: sticky; top: 0; z-index: 10; background: rgba(11, 14, 20, .82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-  nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
-  nav .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-size: 22px; }
-  nav .brand img { width: 34px; height: 34px; }
-  nav .links { margin-left: auto; display: flex; gap: 22px; }
-  nav .links a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; }
+  /* ---------- nav ---------- */
+  nav { position: fixed; inset: 0 0 auto 0; z-index: 50; transition: background .25s, border-color .25s; border-bottom: 1px solid transparent; }
+  nav.scrolled { background: rgba(7, 9, 13, .72); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-color: var(--line); }
+  nav .wrap { display: flex; align-items: center; height: 68px; gap: 32px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand img { width: 34px; height: 34px; }
+  .brand span { font: italic 900 22px/1 var(--display); letter-spacing: .01em; }
+  nav .links { display: flex; gap: 28px; margin-left: auto; }
+  nav .links a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; transition: color .15s; }
   nav .links a:hover { color: var(--text); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; border: 0;
+    font: italic 800 15px/1 var(--display); text-transform: uppercase; letter-spacing: .02em; border-radius: 14px; padding: 17px 26px; transition: transform .15s, box-shadow .2s, background .2s; }
+  .btn svg { width: 19px; height: 19px; flex: none; }
+  .btn-primary { color: #1b1300; background: linear-gradient(180deg, #ffe066, var(--honey) 40%, var(--amber)); box-shadow: 0 10px 34px -8px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .6); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 44px -8px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .6); }
+  .btn-glass { color: var(--text); background: rgba(255, 255, 255, .06); border: 1px solid var(--line2); backdrop-filter: blur(8px); }
+  .btn-glass:hover { background: rgba(255, 255, 255, .1); transform: translateY(-2px); }
+  .btn-sm { padding: 11px 16px; font-size: 13px; border-radius: 11px; }
 
-  .hero {
+  /* ---------- hero ---------- */
+  .hero { position: relative; min-height: min(100svh, 1000px); display: flex; align-items: center; padding: 110px 0 80px; isolation: isolate; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; z-index: -2; background: url("assets/close.jpg") 85% 45% / cover no-repeat; animation: drift 24s ease-in-out infinite alternate; }
+  @keyframes drift { from { transform: scale(1.04); } to { transform: scale(1.12) translate(-1.5%, -1%); } }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -1;
     background:
-      radial-gradient(900px 420px at 80% -10%, rgba(255, 212, 59, .12), transparent 70%),
-      linear-gradient(180deg, var(--bg2), var(--bg));
-    padding: 64px 0 40px;
-  }
-  .hero .wrap { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: center; }
-  .hero h1 { font-size: clamp(64px, 11vw, 116px); line-height: .9; margin: 0; }
-  .hero .kicker { color: var(--honey); font-weight: 700; letter-spacing: .08em; font-size: 14px; margin: 10px 0 18px; }
-  .hero p.lead { font-size: 19px; color: #cfd6e4; margin: 0 0 28px; max-width: 520px; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 14px 22px; border-radius: 12px; text-decoration: none;
-    font-weight: 800; font-style: italic; text-transform: uppercase; letter-spacing: .03em;
-    border: 1px solid transparent; transition: transform .08s, filter .15s;
-  }
-  .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-  .btn-primary { background: linear-gradient(180deg, var(--honey), var(--honey2)); color: #1a1300; box-shadow: 0 6px 24px rgba(245, 159, 0, .25); }
-  .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
-  .btn svg { width: 20px; height: 20px; flex: none; }
-  .meta { color: var(--muted); font-size: 13px; margin-top: 14px; }
-  .shot { border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0, 0, 0, .5); overflow: hidden; }
+      linear-gradient(90deg, var(--bg) 0%, rgba(7, 9, 13, .94) 30%, rgba(7, 9, 13, .55) 58%, rgba(7, 9, 13, .15) 100%),
+      linear-gradient(180deg, rgba(7, 9, 13, .6) 0%, transparent 25%, transparent 70%, var(--bg) 100%); }
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .5; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16v32L28 64 0 48V16zM28 64v33M0 48l-28 16M56 48l28 16' fill='none' stroke='%23ffd43b' stroke-opacity='.06'/%3E%3C/svg%3E");
+    -webkit-mask: linear-gradient(90deg, #000 0%, transparent 55%); mask: linear-gradient(90deg, #000 0%, transparent 55%); }
+  .hero > .wrap { width: 100%; }
+  .hero-content { max-width: 720px; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line2); font-size: 13px; font-weight: 600; color: #d7deea; backdrop-filter: blur(8px); }
+  .pill b { background: var(--honey); color: #1b1300; border-radius: 999px; padding: 3px 9px; font-size: 11px; letter-spacing: .06em; }
+  .hero h1 { font-size: clamp(46px, 6.6vw, 94px); margin: 26px 0 24px; }
+  .hero h1 .line { display: block; }
+  .hero p.lead { font-size: clamp(17px, 1.6vw, 20px); color: #c8d0dd; margin: 0 0 34px; max-width: 540px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 14px; }
+  .trust { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 34px; color: var(--muted); font-size: 14px; font-weight: 500; }
+  .trust span { display: inline-flex; align-items: center; gap: 8px; }
+  .trust svg { width: 17px; height: 17px; color: var(--green); }
+  /* the in-app SIMULATE panel, floating over the robot */
+  .sim-card { position: absolute; right: max(24px, calc((100vw - 1200px) / 2 + 24px)); top: 120px; width: 300px; padding: 16px 18px; border-radius: 16px;
+    background: rgba(10, 13, 19, .72); border: 1px solid var(--line2); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7);
+    font-size: 13px; animation: float 6s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px); } }
+  .sim-card .head { display: flex; justify-content: space-between; align-items: center; color: var(--honey); font: italic 800 12px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+  .sim-card .live { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font: 700 11px/1 var(--body); letter-spacing: .08em; }
+  .sim-card .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(81, 207, 102, .6); animation: ping 1.6s infinite; }
+  @keyframes ping { 70% { box-shadow: 0 0 0 8px rgba(81, 207, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(81, 207, 102, 0); } }
+  .sim-card ul { list-style: none; margin: 0; padding: 0; }
+  .sim-card li { display: flex; justify-content: space-between; padding: 4px 0; color: #9fe6a8; font-variant-numeric: tabular-nums; }
+  .sim-card li.now { color: var(--honey); }
+  .sim-card li span:last-child { color: var(--dim); }
+  .sim-card .sub { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .scroll-hint { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); width: 24px; height: 38px; border: 2px solid var(--line2); border-radius: 14px; }
+  .scroll-hint::after { content: ""; position: absolute; left: 50%; top: 7px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--honey); animation: wheel 1.8s infinite; }
+  @keyframes wheel { 60% { transform: translateY(10px); opacity: 0; } 100% { opacity: 0; } }
 
-  section { padding: 64px 0; }
-  section h2 { font-size: 34px; margin: 0 0 8px; }
-  section .sub { color: var(--muted); margin: 0 0 32px; }
+  /* ---------- marquee ---------- */
+  .marquee { border-block: 1px solid var(--line); background: var(--bg2); overflow: hidden; padding: 18px 0;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .marquee .track { display: flex; gap: 14px; width: max-content; animation: slide 40s linear infinite; }
+  .marquee:hover .track { animation-play-state: paused; }
+  @keyframes slide { to { transform: translateX(-50%); } }
+  .chip { white-space: nowrap; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(255, 255, 255, .03); color: #cfd6e2; font-size: 14px; font-weight: 600; }
+  .chip i { font-style: normal; color: var(--honey); margin-right: 8px; }
 
-  .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .dl { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; }
-  .dl.mine { border-color: var(--honey); box-shadow: 0 0 0 1px var(--honey) inset; }
-  .dl .os { display: flex; align-items: center; gap: 12px; font-size: 22px; margin-bottom: 4px; }
+  /* ---------- sections ---------- */
+  section { padding: 120px 0; position: relative; }
+  .section-head { max-width: 720px; margin-bottom: 64px; }
+  .section-head h2 { font-size: clamp(36px, 5vw, 60px); margin: 16px 0 16px; }
+  .section-head p { color: var(--muted); font-size: 18px; margin: 0; }
+  .center { text-align: center; margin-inline: auto; }
+  .center .eyebrow::after { content: ""; width: 18px; height: 3px; background: var(--honey); transform: skewX(-20deg); border-radius: 2px; }
+
+  .feature { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+  .feature > *, .steps > *, .dl-grid > * { min-width: 0; }
+  .feature + .feature { margin-top: 120px; }
+  .feature.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+  .feature.flip .media { order: 2; }
+  .media { position: relative; }
+  .media::before { content: ""; position: absolute; inset: 12% 8% -6% 8%; background: radial-gradient(closest-side, var(--glow), transparent); filter: blur(40px); opacity: .55; z-index: -1; }
+  .frame { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line2); background: var(--surface); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .8); transform: perspective(1400px) rotateY(var(--ry, -4deg)) rotateX(2deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+  .flip .frame { --ry: 4deg; }
+  .frame:hover { transform: perspective(1400px) rotateY(0) rotateX(0) scale(1.01); }
+  .frame .bar { display: flex; gap: 7px; padding: 12px 14px; background: rgba(255, 255, 255, .03); border-bottom: 1px solid var(--line); }
+  .frame .bar i { width: 11px; height: 11px; border-radius: 50%; background: #2a3344; }
+  .frame .bar i:first-child { background: #ff6b6b; } .frame .bar i:nth-child(2) { background: #ffd43b; } .frame .bar i:nth-child(3) { background: #51cf66; }
+  .num { font: italic 900 15px/1 var(--display); color: var(--dim); letter-spacing: .1em; }
+  .num b { color: var(--honey); }
+  .feature h3 { font-size: clamp(30px, 3.4vw, 44px); margin: 14px 0 18px; }
+  .feature p { color: #c3cbd8; font-size: 17px; margin: 0 0 24px; }
+  .checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .checks li { display: flex; gap: 12px; color: #d9dfe9; font-size: 15px; }
+  .checks svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--honey); }
+
+  /* ---------- steps ---------- */
+  .steps-bg { background: linear-gradient(180deg, var(--bg), var(--bg2) 30%, var(--bg2) 70%, var(--bg)); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; counter-reset: s; }
+  .step { position: relative; padding: 34px 30px 32px; border-radius: var(--radius); background: linear-gradient(180deg, var(--surface2), var(--surface)); border: 1px solid var(--line); overflow: hidden; }
+  .step::before { counter-increment: s; content: "0" counter(s); position: absolute; right: 18px; top: 6px; font: italic 900 92px/1 var(--display); color: rgba(255, 212, 59, .07); }
+  .step .ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: rgba(255, 212, 59, .1); border: 1px solid rgba(255, 212, 59, .25); color: var(--honey); margin-bottom: 22px; }
+  .step .ic svg { width: 24px; height: 24px; }
+  .step h3 { font: italic 800 22px/1.15 var(--display); text-transform: uppercase; margin: 0 0 10px; }
+  .step p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* ---------- download ---------- */
+  .dl-panel { position: relative; border-radius: 28px; padding: 64px 56px; overflow: hidden; isolation: isolate; border: 1px solid var(--line2);
+    background: radial-gradient(800px 380px at 50% -10%, rgba(255, 212, 59, .16), transparent 70%), linear-gradient(180deg, var(--surface2), var(--bg2)); }
+  .dl-panel::after { content: ""; position: absolute; inset: 0; z-index: -1; background: url("assets/hero.jpg") center 35% / cover; opacity: .08; }
+  .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; }
+  .dl { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 26px; border-radius: 18px; background: rgba(7, 9, 13, .55); border: 1px solid var(--line2); transition: transform .2s, border-color .2s; }
+  .dl:hover { transform: translateY(-4px); border-color: rgba(255, 212, 59, .45); }
+  .dl.mine { border-color: var(--honey); box-shadow: 0 0 0 1px var(--honey) inset, 0 20px 50px -20px var(--glow); }
+  .dl .os { display: flex; align-items: center; gap: 12px; font: italic 900 26px/1 var(--display); text-transform: uppercase; }
   .dl .os svg { width: 30px; height: 30px; }
-  .dl .req { color: var(--muted); font-size: 14px; margin: 0 0 18px; flex: 1; }
-  .dl .btn { justify-content: center; }
-  .dl .file { color: var(--muted); font-size: 12px; text-align: center; margin-top: 10px; }
-  .tag { display: none; font-size: 11px; font-weight: 800; font-style: italic; color: #1a1300; background: var(--honey); border-radius: 6px; padding: 2px 8px; margin-left: auto; }
+  .dl .tag { display: none; margin-left: auto; font: 700 10px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: #1b1300; background: var(--honey); border-radius: 999px; padding: 6px 9px; }
   .dl.mine .tag { display: inline-block; }
+  .dl .req { color: var(--muted); font-size: 14px; margin: 8px 0 20px; flex: 1; }
+  .dl .file { text-align: center; color: var(--dim); font-size: 12px; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .dl-foot { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; color: var(--muted); font-size: 14px; }
+  .dl-foot a { color: var(--honey); text-decoration: none; font-weight: 600; }
 
-  .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
-  .feat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  .feat img { aspect-ratio: 16 / 9; object-fit: cover; width: 100%; border-bottom: 1px solid var(--line); }
-  .feat .body { padding: 20px 22px 24px; }
-  .feat h3 { margin: 0 0 6px; font-size: 20px; }
-  .feat p { margin: 0; color: #c3cbdb; font-size: 15px; }
-  .feat h3 .bar { display: inline-block; width: 5px; height: 18px; background: var(--honey); transform: skewX(-18deg); margin-right: 10px; vertical-align: -2px; }
+  /* ---------- faq ---------- */
+  .faq { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
+  details { border-radius: 16px; background: var(--surface); border: 1px solid var(--line); transition: border-color .2s; }
+  details[open] { border-color: var(--line2); }
+  summary { list-style: none; cursor: pointer; padding: 22px 26px; font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font: 400 26px/1 var(--body); color: var(--honey); transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 0; padding: 0 26px 24px; color: #c3cbd8; }
+  code { font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; color: #e9edf5; word-break: break-word; }
 
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .step { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
-  .step h3 { margin: 0 0 10px; font-size: 18px; }
-  .step ol { margin: 0; padding-left: 20px; color: #c3cbdb; font-size: 15px; }
-  .step li { margin-bottom: 6px; }
-  code { background: #0f1420; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 13px; color: #e9edf5; word-break: break-word; }
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 64px 0 56px; background: var(--bg2); }
+  .foot-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 40px; }
+  .foot-top .links { display: flex; gap: 26px; }
+  .foot-top .links a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; }
+  .foot-top .links a:hover { color: var(--text); }
+  .notice { display: flex; gap: 18px; align-items: flex-start; padding: 24px 26px; border-radius: 18px; border: 1px solid rgba(255, 212, 59, .28); background: rgba(255, 212, 59, .05); }
+  .notice svg { flex: none; width: 24px; height: 24px; color: var(--honey); margin-top: 2px; }
+  .notice strong { display: block; font-size: 15px; margin-bottom: 6px; }
+  .notice p { margin: 0; color: #cdd4df; font-size: 14px; }
+  .credits { margin-top: 28px; color: var(--dim); font-size: 13px; }
+  .credits a { color: var(--muted); }
 
-  .note { margin-top: 22px; color: var(--muted); font-size: 14px; }
+  /* ---------- reveal on scroll ---------- */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); }
+  .reveal.in { opacity: 1; transform: none; }
 
-  footer { border-top: 1px solid var(--line); padding: 36px 0 48px; color: var(--muted); font-size: 13px; }
-  footer .disclaimer { color: #c3cbdb; font-size: 14px; margin: 0 0 16px; max-width: 860px; }
-  footer p { margin: 0 0 8px; }
-
-  @media (max-width: 900px) {
-    .hero .wrap { grid-template-columns: 1fr; gap: 32px; }
-    .downloads, .steps { grid-template-columns: 1fr; }
-    .features { grid-template-columns: 1fr; }
+  @media (max-width: 980px) {
     nav .links { display: none; }
+    nav .wrap { gap: 16px; }
+    nav .btn-sm { margin-left: auto; }
+    .hero { align-items: flex-end; min-height: min(92svh, 860px); }
+    .hero-bg { background-position: 62% 30%; }
+    .hero::before { background: linear-gradient(180deg, rgba(7, 9, 13, .35) 0%, rgba(7, 9, 13, .55) 40%, rgba(7, 9, 13, .96) 72%, var(--bg) 100%); }
+    .sim-card, .scroll-hint { display: none; }
+    .feature, .feature.flip { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+    .feature.flip .media { order: 0; }
+    .feature + .feature { margin-top: 90px; }
+    .frame, .flip .frame { transform: none; }
+    .steps, .dl-grid { grid-template-columns: minmax(0, 1fr); }
+    section { padding: 90px 0; }
+    .dl-panel { padding: 44px 22px; border-radius: 22px; }
+  }
+  @media (max-width: 520px) {
+    .wrap { padding: 0 18px; }
+    .cta .btn { width: 100%; }
+    .cta { flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
   }
 </style>
 </head>
 <body>
 
-<nav>
+<nav id="nav">
   <div class="wrap">
-    <a class="brand display" href="#"><img src="assets/icon-512.png" alt="">BEE</a>
+    <a class="brand" href="#top" aria-label="BEE home"><img src="assets/icon-512.png" alt=""><span>BEE</span></a>
     <div class="links">
-      <a href="#download">Download</a>
       <a href="#features">Features</a>
-      <a href="#install">Install</a>
+      <a href="#how">How it works</a>
+      <a href="#download">Download</a>
+      <a href="#faq">FAQ</a>
     </div>
+    <a class="btn btn-primary btn-sm" href="#download">Download</a>
   </div>
 </nav>
 
-<header class="hero">
+<header class="hero" id="top">
+  <div class="hero-bg" role="img" aria-label="A team's own robot, imported from CAD, on the BEE field"></div>
   <div class="wrap">
-    <div>
-      <h1 class="display">BEE</h1>
-      <div class="kicker display">Robot simulator · 2026–27</div>
-      <p class="lead">A free 3D simulator for the <em>FIRST</em> Tech Challenge 2026–27 game. Drive full matches, build your robot, and run your team's <strong>real Java OpModes</strong> on it, without a robot.</p>
+    <div class="hero-content">
+      <span class="pill"><b>v1.0</b> Free · Windows · macOS · Linux</span>
+      <h1 class="display">
+        <span class="line">Your robot.</span>
+        <span class="line">Your code.</span>
+        <span class="line grad">On the field.</span>
+      </h1>
+      <p class="lead">BEE is a free 3D robot simulator for the 2026–27 season. Import your robot, run your team's <strong>real Java OpModes</strong> and play full matches before the robot is even built.</p>
       <div class="cta">
         <a class="btn btn-primary" id="main-dl" href="#download">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
-          <span id="main-dl-text">Download</span>
+          <span id="main-dl-text">Download free</span>
         </a>
-        <a class="btn btn-ghost" href="#download">All platforms</a>
+        <a class="btn btn-glass" href="#features">See what it does</a>
       </div>
-      <div class="meta" id="main-meta">Free · Windows, macOS, Linux · Java included, nothing else to install</div>
+      <div class="trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Java included</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No account</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Works offline</span>
+      </div>
     </div>
-    <div class="shot"><img src="assets/test_in_sim.jpg" alt="BEE running a Java autonomous OpMode on the field" width="1600" height="900"></div>
   </div>
+  <div class="sim-card" aria-hidden="true">
+    <div class="head">Simulate · MyAuto <span class="live">JAVA LIVE</span></div>
+    <div class="sub">running · 3.2 s · 3 / 4 done</div>
+    <ul>
+      <li><span>✓ GO TO point 1 (18, −6)</span><span>0.7 s</span></li>
+      <li><span>✓ GO TO point 2 (24, −29)</span><span>1.3 s</span></li>
+      <li><span>✓ GO TO point 3 (47, −32)</span><span>0.8 s</span></li>
+      <li class="now"><span>▶ SHOOT 4</span><span>0.4 s</span></li>
+    </ul>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"></div>
 </header>
 
-<section id="download">
+<div class="marquee" aria-label="What BEE simulates">
+  <div class="track">
+    <span class="chip"><i>◆</i>Real Java OpModes</span><span class="chip"><i>◆</i>Mecanum drive</span><span class="chip"><i>◆</i>IMU</span><span class="chip"><i>◆</i>Pinpoint odometry</span><span class="chip"><i>◆</i>Limelight</span><span class="chip"><i>◆</i>Distance &amp; color sensors</span><span class="chip"><i>◆</i>Pedro Pathing</span><span class="chip"><i>◆</i>Road Runner</span><span class="chip"><i>◆</i>STL / GLB CAD import</span><span class="chip"><i>◆</i>Driver Station XML</span><span class="chip"><i>◆</i>Gamepad or keyboard</span><span class="chip"><i>◆</i>Bots</span><span class="chip"><i>◆</i>Replays</span><span class="chip"><i>◆</i>Online leaderboard</span>
+    <span class="chip" aria-hidden="true"><i>◆</i>Real Java OpModes</span><span class="chip" aria-hidden="true"><i>◆</i>Mecanum drive</span><span class="chip" aria-hidden="true"><i>◆</i>IMU</span><span class="chip" aria-hidden="true"><i>◆</i>Pinpoint odometry</span><span class="chip" aria-hidden="true"><i>◆</i>Limelight</span><span class="chip" aria-hidden="true"><i>◆</i>Distance &amp; color sensors</span><span class="chip" aria-hidden="true"><i>◆</i>Pedro Pathing</span><span class="chip" aria-hidden="true"><i>◆</i>Road Runner</span><span class="chip" aria-hidden="true"><i>◆</i>STL / GLB CAD import</span><span class="chip" aria-hidden="true"><i>◆</i>Driver Station XML</span><span class="chip" aria-hidden="true"><i>◆</i>Gamepad or keyboard</span><span class="chip" aria-hidden="true"><i>◆</i>Bots</span><span class="chip" aria-hidden="true"><i>◆</i>Replays</span><span class="chip" aria-hidden="true"><i>◆</i>Online leaderboard</span>
+  </div>
+</div>
+
+<section id="features">
   <div class="wrap">
-    <h2 class="display">Download</h2>
-    <p class="sub">Version 1.0. Unzip and play: the Java runtime is inside, so your TeamCode compiles without installing a JDK.</p>
-    <div class="downloads">
-      <div class="dl" data-os="windows">
-        <div class="os display">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.5v7H3zm8.5-1.1L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zm8.5 0H21V21l-9.5-1.4z"/></svg>
-          Windows <span class="tag">Your system</span>
-        </div>
-        <p class="req">Windows 10 or 11, 64-bit.</p>
-        <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-windows.zip">Download .zip</a>
-        <div class="file">BEE-windows.zip · 84 MB</div>
-      </div>
-      <div class="dl" data-os="macos">
-        <div class="os display">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.1 5.8c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1.1.1 2.2-.6 2.8-1.4z"/></svg>
-          macOS <span class="tag">Your system</span>
-        </div>
-        <p class="req">macOS 11 or newer. Apple Silicon (M1 and later). On an Intel Mac, install a JDK 17+ first.</p>
-        <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-macos.zip">Download .zip</a>
-        <div class="file">BEE-macos.zip · 103 MB</div>
-      </div>
-      <div class="dl" data-os="linux">
-        <div class="os display">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.4 0 1.4-.3 2.4-1.3 3.8-1.3 1.8-2.6 3.8-2.6 6.1 0 .7.1 1.3.4 1.9-.9.5-1.6 1.1-1.4 1.9.3 1.1 2.3.9 3.7 1.6 1.5.7 3 .6 3.6-.4h2.4c.6 1 2.1 1.1 3.6.4 1.4-.7 3.4-.5 3.7-1.6.2-.8-.5-1.4-1.4-1.9.3-.6.4-1.2.4-1.9 0-2.3-1.3-4.3-2.6-6.1-1-1.4-1.3-2.4-1.3-3.8C15.6 3.9 14.2 2 12 2zm-1.6 4.2c.5 0 .8.6.8 1.2 0 .3-.1.6-.2.8l-.6-.3c.1-.1.1-.3.1-.5 0-.3-.1-.5-.2-.5s-.2.2-.2.5l.1.3-.5.3c-.1-.2-.1-.4-.1-.7 0-.6.3-1.1.8-1.1zm3.1 0c.5 0 .8.5.8 1.1 0 .3 0 .5-.1.7l-.5-.3.1-.3c0-.3-.1-.5-.2-.5s-.2.2-.2.5c0 .2 0 .4.1.5l-.6.3c-.1-.2-.2-.5-.2-.8 0-.6.3-1.2.8-1.2zM12 9.3c.9 0 2 .7 2 1.1s-1.1 1.3-2 1.3-2-.9-2-1.3 1.1-1.1 2-1.1z"/></svg>
-          Linux <span class="tag">Your system</span>
-        </div>
-        <p class="req">64-bit (x86_64), a desktop with Vulkan drivers.</p>
-        <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-linux.tar.gz">Download .tar.gz</a>
-        <div class="file">BEE-linux.tar.gz · 76 MB</div>
+    <div class="section-head reveal">
+      <span class="eyebrow">Features</span>
+      <h2 class="display">Practice without<br><span class="grad">waiting for the robot</span></h2>
+      <p>Write the code, tune the auto and train the drivers while the real robot is still in pieces.</p>
+    </div>
+
+    <div class="feature reveal">
+      <div class="media"><div class="frame"><div class="bar"><i></i><i></i><i></i></div><img src="assets/java.jpg" alt="A Java OpMode drives the robot through its autonomous, with the live step list" width="1600" height="900" loading="lazy"></div></div>
+      <div>
+        <div class="num"><b>01</b> / RUN YOUR CODE</div>
+        <h3 class="display">Your real Java,<br>on a simulated robot</h3>
+        <p>Your TeamCode compiles against a simulated control hub and drives the robot exactly like on the real one. Telemetry, logs and errors show up as you play.</p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span><code>hardwareMap</code>, motors, encoders, servos, IMU, Pinpoint, Limelight and sensors</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Pedro Pathing and Road Runner run as they do on the robot</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Java is built in: nothing to install</span></li>
+        </ul>
       </div>
     </div>
-    <p class="note">All versions and release notes: <a href="https://github.com/MariusAndrei123/bee-simulator/releases">GitHub Releases</a>. A gamepad works as gamepad1; without one, the keyboard imitates it.</p>
+
+    <div class="feature flip reveal">
+      <div class="media"><div class="frame"><div class="bar"><i></i><i></i><i></i></div><img src="assets/cad.jpg" alt="A team's own robot, imported from CAD, on the field" width="1600" height="900" loading="lazy"></div></div>
+      <div>
+        <div class="num"><b>02</b> / ROBOT GARAGE</div>
+        <h3 class="display">Bring your<br>own robot</h3>
+        <p>Import your CAD and it drives on the field with your mass, speed and motors. Or build a robot from blocks in minutes: intake, turret, launcher, camera and sensors.</p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>STL and GLB models, with moving turrets</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Motor names and directions set by hand, or read from your Driver Station XML or code (Beta lab)</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Checks the 18 in start size for you</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature reveal">
+      <div class="media"><div class="frame"><div class="bar"><i></i><i></i><i></i></div><img src="assets/auto-builder.jpg" alt="The Auto Builder with a drawn path" width="1600" height="900" loading="lazy"></div></div>
+      <div>
+        <div class="num"><b>03</b> / AUTO BUILDER</div>
+        <h3 class="display">Draw the auto.<br>Get the code.</h3>
+        <p>Click points on the field or stack blocks like <em>go to</em>, <em>intake</em>, <em>shoot</em> and <em>wait until</em>. Test it in the simulator, then take the generated Java OpMode to your robot.</p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Path mode and blocks mode</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Timeline of the 30 s, so you see what fits</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>One click from drawing to Test in sim</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature flip reveal">
+      <div class="media"><div class="frame"><div class="bar"><i></i><i></i><i></i></div><img src="assets/match.jpg" alt="A match on the BEE field" width="1600" height="900" loading="lazy"></div></div>
+      <div>
+        <div class="num"><b>04</b> / PLAY</div>
+        <h3 class="display">Full matches,<br>real pressure</h3>
+        <p>2:30 matches with autonomous and driver control, bots on both alliances, scoring, fouls and a match clock. Or free play and short challenges to train your drivers.</p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Gamepad or keyboard</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Records, replays and an online leaderboard</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span>Smooth on a laptop, sharp on a big screen</span></li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 
-<section id="features" style="background: var(--bg2)">
+<section id="how" class="steps-bg">
   <div class="wrap">
-    <h2 class="display">What you can do</h2>
-    <p class="sub">The BEE field: POLLEN, NECTAR, FLOWERS and the HIVE, with the scoring, fouls and match clock of the game manual.</p>
-    <div class="features">
-      <div class="feat">
-        <img src="assets/match.jpg" alt="A full match on the BEE field" loading="lazy" width="1600" height="900">
-        <div class="body">
-          <h3 class="display"><span class="bar"></span>Play matches</h3>
-          <p>Full matches, autonomous only, driver control, free play and short challenges, with bots on the field. Local records, replays and an online leaderboard.</p>
-        </div>
-      </div>
-      <div class="feat">
-        <img src="assets/test_in_sim.jpg" alt="A Java OpMode driving the robot" loading="lazy" width="1600" height="900">
-        <div class="body">
-          <h3 class="display"><span class="bar"></span>Run your own Java</h3>
-          <p>Your TeamCode compiles against a simulated Control Hub: hardwareMap, motors, encoders, servos, IMU, Pinpoint, Limelight, distance and color sensors. The simulator drives the robot from your code.</p>
-        </div>
-      </div>
-      <div class="feat">
-        <img src="assets/garage.jpg" alt="The Robot Garage" loading="lazy" width="1600" height="900">
-        <div class="body">
-          <h3 class="display"><span class="bar"></span>Robot Garage</h3>
-          <p>Build the robot from blocks: intake, turret, launcher, camera and sensors. Import its CAD (STL / GLB), set mass, speed and motors, and check the 18 in start-size rule.</p>
-        </div>
-      </div>
-      <div class="feat">
-        <img src="assets/auto_builder.jpg" alt="The Auto Builder" loading="lazy" width="1600" height="900">
-        <div class="body">
-          <h3 class="display"><span class="bar"></span>Auto Builder</h3>
-          <p>Draw a path or build an autonomous from blocks, test it in the simulator, and export it as a ready-to-use FTC OpMode.</p>
-        </div>
-      </div>
+    <div class="section-head center reveal">
+      <span class="eyebrow">How it works</span>
+      <h2 class="display">On the field in<br><span class="grad">three steps</span></h2>
     </div>
-  </div>
-</section>
-
-<section id="install">
-  <div class="wrap">
-    <h2 class="display">First start</h2>
-    <p class="sub">BEE is not signed by Apple or Microsoft yet, so the first time your system asks you to confirm.</p>
     <div class="steps">
-      <div class="step">
-        <h3 class="display">Windows</h3>
-        <ol>
-          <li>Unzip <code>BEE-windows.zip</code>.</li>
-          <li>Open the <code>BEE</code> folder and run <code>BEE.exe</code>.</li>
-          <li>If SmartScreen appears: <strong>More info → Run anyway</strong>.</li>
-        </ol>
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg></div>
+        <h3>Download &amp; unzip</h3>
+        <p>One file for your system. No installer, no Java to set up, no account.</p>
       </div>
-      <div class="step">
-        <h3 class="display">macOS</h3>
-        <ol>
-          <li>Unzip <code>BEE-macos.zip</code> and move <code>BEE.app</code> to Applications.</li>
-          <li>Open it. macOS says it cannot check the app: click <strong>Done</strong>.</li>
-          <li>System Settings → Privacy &amp; Security → <strong>Open Anyway</strong>.</li>
-        </ol>
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg></div>
+        <h3>Set up your robot</h3>
+        <p>Import your CAD in the Garage, or start from the demo robot and change it.</p>
       </div>
-      <div class="step">
-        <h3 class="display">Linux</h3>
-        <ol>
-          <li><code>tar -xzf BEE-linux.tar.gz</code></li>
-          <li>Run <code>BEE/BEE.x86_64</code>.</li>
-          <li>Keep <code>java/</code> and <code>runtime/</code> next to it.</li>
-        </ol>
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14l11-7z"/></svg></div>
+        <h3>Drive &amp; run code</h3>
+        <p>Pick your TeamCode folder and run your OpModes, or draw an auto and press Test in sim.</p>
       </div>
     </div>
-    <p class="note">Your robots, autos and settings are saved in your user folder (<code>Godot/app_userdata/ftc_project</code>), so a new version keeps them.</p>
+  </div>
+</section>
+
+<section id="download" style="padding-top:40px">
+  <div class="wrap">
+    <div class="dl-panel reveal">
+      <div class="section-head center" style="margin-bottom:0">
+        <span class="eyebrow">Download</span>
+        <h2 class="display">Get <span class="grad">BEE</span></h2>
+        <p>Version 1.0 · free · the Java runtime is inside</p>
+      </div>
+      <div class="dl-grid">
+        <div class="dl" data-os="windows">
+          <div class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.5v7H3zm8.5-1.1L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zm8.5 0H21V21l-9.5-1.4z"/></svg>Windows<span class="tag">Your system</span></div>
+          <p class="req">Windows 10 or 11, 64-bit.</p>
+          <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-windows.zip">Download .zip</a>
+          <div class="file">BEE-windows.zip · 84 MB</div>
+        </div>
+        <div class="dl" data-os="macos">
+          <div class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.1 5.8c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1.1.1 2.2-.6 2.8-1.4z"/></svg>macOS<span class="tag">Your system</span></div>
+          <p class="req">Apple Silicon (M1 or newer). On an Intel Mac, install a JDK 17+ first.</p>
+          <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-macos.zip">Download .zip</a>
+          <div class="file">BEE-macos.zip · 103 MB</div>
+        </div>
+        <div class="dl" data-os="linux">
+          <div class="os"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.4 0 1.4-.3 2.4-1.3 3.8-1.3 1.8-2.6 3.8-2.6 6.1 0 .7.1 1.3.4 1.9-.9.5-1.6 1.1-1.4 1.9.3 1.1 2.3.9 3.7 1.6 1.5.7 3 .6 3.6-.4h2.4c.6 1 2.1 1.1 3.6.4 1.4-.7 3.4-.5 3.7-1.6.2-.8-.5-1.4-1.4-1.9.3-.6.4-1.2.4-1.9 0-2.3-1.3-4.3-2.6-6.1-1-1.4-1.3-2.4-1.3-3.8C15.6 3.9 14.2 2 12 2zm-1.6 4.2c.5 0 .8.6.8 1.2 0 .3-.1.6-.2.8l-.6-.3c.1-.1.1-.3.1-.5 0-.3-.1-.5-.2-.5s-.2.2-.2.5l.1.3-.5.3c-.1-.2-.1-.4-.1-.7 0-.6.3-1.1.8-1.1zm3.1 0c.5 0 .8.5.8 1.1 0 .3 0 .5-.1.7l-.5-.3.1-.3c0-.3-.1-.5-.2-.5s-.2.2-.2.5c0 .2 0 .4.1.5l-.6.3c-.1-.2-.2-.5-.2-.8 0-.6.3-1.2.8-1.2zM12 9.3c.9 0 2 .7 2 1.1s-1.1 1.3-2 1.3-2-.9-2-1.3 1.1-1.1 2-1.1z"/></svg>Linux<span class="tag">Your system</span></div>
+          <p class="req">64-bit (x86_64) with Vulkan drivers.</p>
+          <a class="btn btn-primary" href="https://github.com/MariusAndrei123/bee-simulator/releases/latest/download/BEE-linux.tar.gz">Download .tar.gz</a>
+          <div class="file">BEE-linux.tar.gz · 76 MB</div>
+        </div>
+      </div>
+      <div class="dl-foot">
+        <span>First start: see <a href="#faq">the FAQ</a> for the one-time Windows / macOS prompt</span>
+        <a href="https://github.com/MariusAndrei123/bee-simulator/releases">All releases →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="padding-top:40px">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="display">Questions</h2>
+    </div>
+    <div class="faq reveal">
+      <details open>
+        <summary>Is BEE really free?</summary>
+        <p>Yes. No account, no ads, no paid version. Download it and play.</p>
+      </details>
+      <details>
+        <summary>Do I need to install Java or anything else?</summary>
+        <p>No. A small Java runtime with the compiler comes inside the download, so your TeamCode compiles and runs right away. Only Intel Macs need a JDK 17+ installed (from adoptium.net).</p>
+      </details>
+      <details>
+        <summary>macOS says it can't open BEE</summary>
+        <p>BEE is not signed by Apple yet. Open it once, click <strong>Done</strong>, then go to System Settings → Privacy &amp; Security and click <strong>Open Anyway</strong>. You only do this the first time.</p>
+      </details>
+      <details>
+        <summary>Windows shows a SmartScreen warning</summary>
+        <p>The app is not signed by Microsoft yet. Click <strong>More info → Run anyway</strong>. Keep the <code>java</code> and <code>runtime</code> folders next to <code>BEE.exe</code>.</p>
+      </details>
+      <details>
+        <summary>Where are my robots and autos saved?</summary>
+        <p>In your user folder (<code>Godot/app_userdata/ftc_project</code>): on macOS under <code>~/Library/Application Support</code>, on Windows under <code>%APPDATA%</code>, on Linux under <code>~/.local/share</code>. A new version of BEE keeps them.</p>
+      </details>
+      <details>
+        <summary>Is BEE an official app?</summary>
+        <p>No. BEE is an independent project. It is not affiliated with, sponsored by or endorsed by <em>FIRST</em>®. See the notice at the bottom of this page.</p>
+      </details>
+    </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <p class="disclaimer"><em>FIRST</em>, <em>FIRST</em> Tech Challenge, and BIOBUZZ are registered trademarks of <em>FIRST</em>® (<a href="https://www.firstinspires.org">www.firstinspires.org</a>) which is not overseeing, involved with, or responsible for this activity, product, or service.</p>
-    <p>BEE is free.</p>
-    <p>Made with the <a href="https://godotengine.org">Godot Engine</a> (MIT license). The bundled Java runtime is <a href="https://adoptium.net">Eclipse Temurin</a> 21 (GPLv2 with the Classpath Exception, <a href="https://github.com/adoptium/jdk21u">source</a>). Pedro Pathing, Road Runner and the other libraries keep their own licenses (in <code>java/lib</code>).</p>
+    <div class="foot-top">
+      <a class="brand" href="#top"><img src="assets/icon-512.png" alt=""><span>BEE</span></a>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="https://github.com/MariusAndrei123/bee-simulator/releases">Releases</a>
+      </div>
+    </div>
+    <div class="notice" role="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div>
+        <strong>Independent project. Not affiliated with <em>FIRST</em>®.</strong>
+        <p><em>FIRST</em>, <em>FIRST</em> Tech Challenge, and BIOBUZZ are registered trademarks of <em>FIRST</em>® (<a href="https://www.firstinspires.org">www.firstinspires.org</a>) which is not overseeing, involved with, or responsible for this activity, product, or service.</p>
+      </div>
+    </div>
+    <p class="credits">Made with the <a href="https://godotengine.org">Godot Engine</a> (MIT). The bundled Java runtime is <a href="https://adoptium.net">Eclipse Temurin</a> 21 (GPLv2 with the Classpath Exception, <a href="https://github.com/adoptium/jdk21u">source</a>). Pedro Pathing, Road Runner and the other libraries keep their own licenses (in <code>java/lib</code>).</p>
   </div>
 </footer>
 
 <script>
-  // highlight the visitor's system and point the main button at its download
+  // solid nav after the hero starts to scroll
+  var nav = document.getElementById("nav");
+  function onScroll() { nav.classList.toggle("scrolled", window.scrollY > 24); }
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  // fade sections in as they enter the screen
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  }
+
+  // the visitor's system first, highlighted, and the hero button downloads it
   (function () {
     var ua = navigator.userAgent, os = null;
     if (/iPhone|iPad|iPod|Android/.test(ua)) os = null;
     else if (/Windows/.test(ua)) os = "windows";
     else if (/Mac/.test(ua)) os = "macos";
     else if (/Linux|X11/.test(ua)) os = "linux";
+    if (!os) return;
     var names = { windows: "Windows", macos: "macOS", linux: "Linux" };
-    if (!os) {
-      document.getElementById("main-meta").textContent = "BEE runs on Windows, macOS and Linux computers.";
-      return;
-    }
     var card = document.querySelector('.dl[data-os="' + os + '"]');
     card.classList.add("mine");
     card.parentNode.insertBefore(card, card.parentNode.firstChild);
-    var main = document.getElementById("main-dl");
-    main.href = card.querySelector("a.btn").href;
+    document.getElementById("main-dl").href = card.querySelector("a.btn").href;
     document.getElementById("main-dl-text").textContent = "Download for " + names[os];
-    document.getElementById("main-meta").textContent = "Free · " + card.querySelector(".file").textContent + " · Java included";
   })();
 </script>
 </body>
