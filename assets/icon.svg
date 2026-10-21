@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2638"/>
+      <stop offset="1" stop-color="#0b0e14"/>
+    </linearGradient>
+    <linearGradient id="honey" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd43b"/>
+      <stop offset="1" stop-color="#f59f00"/>
+    </linearGradient>
+  </defs>
+  <!-- macOS-style tile: 824 px rounded square with a 100 px margin -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <!-- honeycomb behind the bee -->
+  <g fill="none" stroke="#ffd43b" stroke-opacity="0.16" stroke-width="14">
+    <path d="M512 196 L640 270 L640 418 L512 492 L384 418 L384 270 Z"/>
+    <path d="M256 492 L384 566 L384 714 L256 788 L128 714 L128 566 Z" transform="translate(40 0)"/>
+    <path d="M768 492 L896 566 L896 714 L768 788 L640 714 L640 566 Z" transform="translate(-40 0)"/>
+  </g>
+  <!-- big hexagon -->
+  <path d="M512 232 L754 372 L754 652 L512 792 L270 652 L270 372 Z" fill="url(#honey)"/>
+  <path d="M512 232 L754 372 L754 652 L512 792 L270 652 L270 372 Z" fill="none" stroke="#0b0e14" stroke-opacity="0.25" stroke-width="16"/>
+  <!-- wings -->
+  <ellipse cx="430" cy="410" rx="92" ry="140" transform="rotate(-28 430 410)" fill="#ffffff" fill-opacity="0.92" stroke="#0b0e14" stroke-width="14"/>
+  <ellipse cx="594" cy="410" rx="92" ry="140" transform="rotate(28 594 410)" fill="#ffffff" fill-opacity="0.92" stroke="#0b0e14" stroke-width="14"/>
+  <!-- body with stripes -->
+  <clipPath id="body"><ellipse cx="512" cy="562" rx="118" ry="150"/></clipPath>
+  <ellipse cx="512" cy="562" rx="118" ry="150" fill="#ffd43b"/>
+  <g clip-path="url(#body)" fill="#0b0e14">
+    <rect x="380" y="500" width="264" height="44"/>
+    <rect x="380" y="586" width="264" height="44"/>
+    <rect x="380" y="672" width="264" height="60"/>
+  </g>
+  <ellipse cx="512" cy="562" rx="118" ry="150" fill="none" stroke="#0b0e14" stroke-width="16"/>
+  <!-- stinger -->
+  <path d="M488 706 L536 706 L512 752 Z" fill="#0b0e14"/>
+  <!-- head, eyes, antennae -->
+  <path d="M470 372 Q440 300 404 292 M554 372 Q584 300 620 292" fill="none" stroke="#0b0e14" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="404" cy="292" r="18" fill="#0b0e14"/>
+  <circle cx="620" cy="292" r="18" fill="#0b0e14"/>
+  <circle cx="512" cy="406" r="72" fill="#0b0e14"/>
+  <circle cx="486" cy="396" r="16" fill="#ffffff"/>
+  <circle cx="538" cy="396" r="16" fill="#ffffff"/>
+</svg>
